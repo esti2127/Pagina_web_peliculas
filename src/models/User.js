@@ -15,7 +15,7 @@ const registerUserService = async (body) => {
         'INSERT INTO usuarios(nombre, email, password_hash, rol) VALUES ($1, $2, $3, $4) RETURNING id_usuario, nombre, email, rol',
         [nombre, email, hashPassword, rol]
     )
-    console.log(`resp in register service : ${resp}`)
+ 
     if (resp) {
         return resp.rows[0]
     }

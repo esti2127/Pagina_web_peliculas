@@ -22,3 +22,5 @@ const validateAdmin = (req, res, next) => {
         setResponse(res, false, 403, "Invalid token")
     }
 }
+
+module.exports = validateAdmin

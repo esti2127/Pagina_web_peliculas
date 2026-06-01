@@ -15,9 +15,8 @@ CREATE TABLE peliculas (
   imagen VARCHAR(250) NOT NULL,
   anio INT NOT NULL,
   director VARCHAR(100) NOT NULL,
-  genero VARCHAR(100) NOT NULL,
   duracion INT NOT NULL
-
+  codigo_pelicula VARCHAR(200) NOT NULL
 );
 
 CREATE TABLE generos (

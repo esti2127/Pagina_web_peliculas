@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const router = require('./routes/userRoutes')
+const movieRouter = require('./routes/movieRoutes')
 require('dotenv').config()
 
 
@@ -10,6 +11,7 @@ app.use(express.json())
 //Routes 
 
 app.use('/api/auth', router)
+app.use('/api/movies', movieRouter)
 
 
 
