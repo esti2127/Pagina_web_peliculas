@@ -1,3 +1,10 @@
+ALTER TABLE peliculas 
+  ADD codigo_pelicula VARCHAR(200) NOT NULL default 'not set';
+
+
+ALTER TABLE peliculas drop column genero;
+
+
 DROP TABLE IF EXISTS peliculas_generos, peliculas, usuarios, favoritos, generos CASCADE;
 
 CREATE TABLE usuarios (
@@ -5,24 +12,24 @@ CREATE TABLE usuarios (
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(200) UNIQUE NOT NULL,
     password_hash VARCHAR(250) NOT NULL,
-    rol VARCHAR(50) NOT NULL CHECK (rol IN ('user', 'admin', 'guest'))
+    rol VARCHAR(50) NOT NULL  CHECK (rol IN ('user', 'admin', 'guest'))
   
 );
 
 CREATE TABLE peliculas (
   id_pelicula SERIAL PRIMARY KEY,
+  codigo_pelicula VARCHAR(200) NOT NULL,
   titulo VARCHAR(200) NOT NULL,
   imagen VARCHAR(250) NOT NULL,
   anio INT NOT NULL,
   director VARCHAR(100) NOT NULL,
-  genero VARCHAR(100) NOT NULL,
   duracion INT NOT NULL
 
 );
 
 CREATE TABLE generos (
   id_genero SERIAL PRIMARY KEY,
-  nombre VARCHAR(100) NOT NULL
+  nombre VARCHAR(100) NOT NULL,
 
 );
 
@@ -143,6 +150,17 @@ VALUES
 
 
 
+
+
+
+ALTER TABLE usuarios 
+ALTER COLUMN rol TYPE VARCHAR(50) NOT NULL;
+
+ALTER TABLE usuarios 
+ALTER COLUMN rol SET DEFAULT 'user';
+
+ALTER TABLE usuarios 
+ADD CONSTRAINT chk_rol CHECK (rol IN ('user', 'admin'));
 
 
 
