@@ -6,12 +6,13 @@ const registerUser = async (req, res) => {
 
     try {
 
-        const registredUser = registerUserService(req.body)
-        const token = generateToken(registredUser)
-        return setResponse(res, true, 201, "registred successfully", token, registredUser)
+        const userData = await registerUserService(req.body)
+      
+        const token = generateToken(userData)
+        return setResponse(res, true, 201, "registred successfully", token, userData)
 
     } catch (error) {
-        console.log(error.stack)
+        console.log(error)
         return setResponse(res, false, 400, "Bad request")
     }
 
@@ -21,20 +22,23 @@ const loginUser = async (req, res) => {
 
     try {
         const { email, password } = req.body
+         
 
-        const loggedUser = loginUserService(email, password)
+        const loggedUser = await loginUserService(email, password)
 
         const token = generateToken(loggedUser)
 
         return setResponse(res, true, 200, "logged in successfully", token, loggedUser)
 
     } catch (error) {
-        console.log(error.stack)
-        return setResponse(res, false, 400, "BAd request")
+        console.log(error)
+        return setResponse(res, false, 400, "Password or email not correct")
     }
 }
 const generateToken = (user) => {
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET,
+    return jwt.sign(
+        { id: user.id_usuario, email: user.email },
+        process.env.JWT_SECRET,
         { expiresIn: '1d' }
     )
 }

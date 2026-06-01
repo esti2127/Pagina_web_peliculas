@@ -22,4 +22,4 @@ pool.on('error', (err) => {
     console.error('Error crítico en la Pool de películas:', err.message);
 });
 
-module.exports = pool;
+module.exports = {pool};

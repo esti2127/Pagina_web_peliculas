@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const pool = require('./config/pool')
+const { pool } = require('../config/pool')
 
 /*
 This function register a user in database,
@@ -8,12 +8,14 @@ it returns the current registred user minus his password.
 const registerUserService = async (body) => {
 
     const { nombre, email, password, rol } = body
-    const hashPassword = await generateHashPassword(password)
 
+    const hashPassword = await generateHashPassword(password)
+ 
     const resp = await pool.query(
-        'INSERT INTO usuarios(nombre, email, password_hash, rol) VALUES ($1, $2, $3, $4) RETURNING id, nombre, email, rol',
+        'INSERT INTO usuarios(nombre, email, password_hash, rol) VALUES ($1, $2, $3, $4) RETURNING id_usuario, nombre, email, rol',
         [nombre, email, hashPassword, rol]
     )
+    console.log(`resp in register service : ${resp}`)
     if (resp) {
         return resp.rows[0]
     }
@@ -32,6 +34,7 @@ const loginUserService = async (email, password) => {
         [email]
     )
     const user = resp.rows[0]
+ 
     if (!user) {
         throw new Error('User is not registred')
     }
@@ -50,7 +53,7 @@ const verifyUserPassword = async (password, hash) => {
 }
 
 const generateHashPassword = async (password) => {
-    const hashPassword = await bcrypt.hash(password, process.env.BCRYPT_SALT)
+    const hashPassword = await bcrypt.hash(password, 10)
     return hashPassword
 }
 
