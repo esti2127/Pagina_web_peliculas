@@ -24,7 +24,7 @@ CREATE TABLE peliculas (
   anio INT NOT NULL,
   director VARCHAR(100) NOT NULL,
   duracion INT NOT NULL
-
+  codigo_pelicula VARCHAR(200) NOT NULL
 );
 
 CREATE TABLE generos (

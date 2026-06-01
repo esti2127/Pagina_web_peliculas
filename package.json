@@ -2,8 +2,10 @@
   "name": "proyecto_pagina_peliculas",
   "version": "1.0.0",
   "description": "\"# P-gina_web_pel-culas\"",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node ./src/app.js",
+    "dev": "nodemon ./src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
