@@ -6,17 +6,16 @@ const { setResponse } = require("../utils/utils")
 
 const searchMovie = async (req, res) => {
 
-    const { titulo } = req.body
-    console.log(titulo)
+   // const { titulo } = req.body
 
-    // let movies = []
     try {
-        const movies = await findMovieService(titulo)
+        const movies = await findMovieService(req.body.titulo)
         if (movies === 0) {
             //api externa
-           const data = await getFilms(titulo)
-           const {title, poster_path: imagen, release_date: anio, id } = data
-           console.log(title, imagen, anio, id )
+           const data = await getFilms(req.body.titulo)
+          
+           const {Title:titulo, Year:anio, Runtime:duracion, Poster:imagen, Director:director, imdbID:codigo_pelicula} = data
+         //  console.log(title, imagen, anio, id )
 
            //
  
