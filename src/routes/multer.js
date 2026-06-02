@@ -15,43 +15,28 @@ const router = express.Router()
 const storage = multer.diskStorage({
     destination: 'src/public/uploads',
     //         crear nombre único para evitar repetir archivos
-
-
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname)
     }
 })
 
-
 // // 3. Filtrar tipos de archivo permitidos
-
-
 const fileFilter = (req, file, cb) => {
 
-
-
-
     const archivosPermitidos = ['image/jpeg', 'image/png', 'image/webp']
-
 
     if (archivosPermitidos.includes(file.mimetype)) {
         cb(null, true)
     } else {
         cb(new Error('Tipo de archivo no aceptado'))
     }
-
-
 }
-
 
 // // 4. Configurar multer
 const upload = multer({ storage, fileFilter })
 
-
 // // 5. Crear endpoint para subir archivo
-
-
-router.post('/upload', validateAdmin, upload.single('file'), async (req, res) => {
+router.post('/upload', validateAdmin,  upload.single('file'), async (req, res) => {
     try {
      console.log(req.file);   //         // 6. Comprobar si llegó archivo
         if (!req.file) {
@@ -61,7 +46,6 @@ router.post('/upload', validateAdmin, upload.single('file'), async (req, res) =>
         }
         // 7. Obtener datos del body si los necesitas
         const { id_pelicula } = req.body
-
 
         const result = await cloudinary.uploader.upload(req.file.path);
         // 8. Guardar la ruta en base de datos
