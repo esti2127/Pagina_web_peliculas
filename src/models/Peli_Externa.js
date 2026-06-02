@@ -4,18 +4,10 @@
 const getFilms = async (titulo) => {
   try {
 
-    // Si el usuario quiere buscar por TÍTULO debe aplicar el endpoint 'search')
-
-
-    // const url = `https://api.themoviedb.org/3/search/movie?api_key=2ffc8b50&query=${titulo}&language=es-ES`;
-
     const url = `https://www.omdbapi.com/?apikey=2ffc8b50&t=${titulo}`;
 
-
-
-
     const resp = await fetch(url);
-    console.log(resp)
+    // console.log(resp)
 
     if (!resp.ok) {
       throw new Error(`Error: ${resp.status}`);
