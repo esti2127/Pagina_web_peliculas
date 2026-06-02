@@ -54,22 +54,23 @@ http://localhost:3000
 ## Variables de entorno
 PORT=3000
 
-DB_USER=a
-DB_HOST=
-DB_NAME=
-DB_PASSWORD=
-DB_PORT=
+DB_USER=
+DB_HOST
+DB_NAME
+DB_PASSWORD
+DB_PORT
 
-JWT_SECRET=
+JWT_SECRET
 
-API_KEY_CLOUDY=
-API_KEY_CLOUDY_SECRET=
+API_KEY_CLOUDY
+API_KEY_CLOUDY_SECRET
 ## Tabla de Endpoints
 
 ## Ejemplo para subir una imagen
 
 ## Credenciales de prueba
-
+|usuario|email|contraseña|rol|
+| ------- |------|
 ## Enlace tablero agil 
 
 https://trello.com/b/viL2Mziw/mi-tablero-de-trello
