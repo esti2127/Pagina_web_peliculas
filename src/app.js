@@ -3,6 +3,9 @@ const app = express()
 const router = require('./routes/userRoutes')
 const movieRouter = require('./routes/movieRoutes')
 require('dotenv').config()
+const multerRouter = require('./routes/multer')
+
+app.use('/api/images', multerRouter)
 
 
 

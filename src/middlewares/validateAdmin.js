@@ -1,11 +1,12 @@
 const { setResponse } = require("../utils/utils")
-
+const jwt = require('jsonwebtoken')
 
 const validateAdmin = (req, res, next) => {
 
     try {
 
-        const auth = req.headers.authorization
+        const auth = req.headers['authorization'];
+        
         if (!auth || !auth.startsWith("Bearer")) return setResponse(res, false, 400, "No token found")
 
         const token = auth.split(" ")[1]
