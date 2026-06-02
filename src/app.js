@@ -2,6 +2,7 @@ const express = require('express')
 const routerRoutes = require('./routes/userRoutes')
 const movieRoutes = require('./routes/movieRoutes')
 const adminRoutes = require('./routes/adminRoutes')
+const cors = require('cors')
 
 
 const app = express()

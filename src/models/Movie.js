@@ -35,7 +35,7 @@ const findMovieByIdService = async (movieId) => {
             'SELECT * FROM peliculas WHERE codigo_pelicula=$1',
             [movieId]
         )
-        console.log(resp)
+       // console.log(resp)
         return resp.rows.length === 0 ? 0 : resp.rows[0];
 
     } catch (error) {
@@ -81,7 +81,7 @@ const addNewMovieService = async (titulo, imagen, anio, director, duracion, codi
             'INSERT INTO peliculas (titulo,imagen,anio,director,duracion,codigo_pelicula) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
             [titulo, imagen, anio, director, duracion, codigo_pelicula]
         )
-        console.log(resp)
+       // console.log(resp)
         return resp.rows[0]
     } catch (error) {
         console.log(error)

@@ -6,8 +6,6 @@ const { setResponse } = require("../utils/utils")
 
 const searchMovie = async (req, res) => {
 
-    // const { titulo } = req.body
-
     try {
         const movies = await findMovieService(req.body.titulo)
         if (movies === 0) {
@@ -22,6 +20,7 @@ const searchMovie = async (req, res) => {
             return res.status(200).json({
                 ok: true,
                 message: "movie found",
+                source:"external",
                 data
             })
             await addNewMovieService(titulo, imagen, anio, director, duracion, codigo_pelicula)
@@ -29,6 +28,7 @@ const searchMovie = async (req, res) => {
         return res.status(200).json({
             ok: true,
             message: "Search Details",
+            source:"local",
             movies
         })
     } catch (error) {
@@ -108,8 +108,7 @@ const getMovieDetails = async (req, res) => {
         //  console.log(movieId);
 
         const foundMovie = await findMovieByIdService(movieId);
-        console.log("Found Movie:", foundMovie);
-
+        
         if (foundMovie === 0 || !foundMovie) {
             return res.status(404).json({
                 ok: false,
@@ -232,10 +231,10 @@ const updateMovie = async (req, res) => {
             return res.status(400).json({
                 ok: false,
                 message: "Fill required inputs titlo, director, anio ,duracion"
-            });
+            })
         }
 
-        let imagen = null;
+        let imagen = null
         if (req.file) {
             imagen = req.file.path
         }
