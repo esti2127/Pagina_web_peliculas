@@ -54,7 +54,7 @@ http://localhost:3000
 ## Variables de entorno
 PORT=3000
 
-DB_USER=
+DB_USER=a
 DB_HOST=
 DB_NAME=
 DB_PASSWORD=
