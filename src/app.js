@@ -7,6 +7,9 @@ const adminRoutes = require('./routes/adminRoutes')
 const app = express()
 require('dotenv').config()
 
+//Cors
+app.use(cors({ origin: 'http://localhost:3000' }))
+
 //Middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
