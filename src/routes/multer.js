@@ -51,7 +51,7 @@ const upload = multer({ storage, fileFilter })
 // // 5. Crear endpoint para subir archivo
 
 
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', validateAdmin, upload.single('file'), async (req, res) => {
     try {
      console.log(req.file);   //         // 6. Comprobar si llegó archivo
         if (!req.file) {
