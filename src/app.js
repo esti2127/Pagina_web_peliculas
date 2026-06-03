@@ -1,27 +1,28 @@
 const express = require('express')
+const routerRoutes = require('./routes/userRoutes')
+const movieRoutes = require('./routes/movieRoutes')
+const adminRoutes = require('./routes/adminRoutes')
+const cors = require('cors')
+
+
 const app = express()
-const router = require('./routes/userRoutes')
-const movieRouter = require('./routes/movieRoutes')
 require('dotenv').config()
-const multerRouter = require('./routes/multer')
 
-app.use('/api/images', multerRouter)
+//Cors
+app.use(cors({ origin: 'http://localhost:3000' }))
 
-
-
+//Middlewares
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 //Routes 
+app.use('/api/auth', routerRoutes)
+app.use('/api/movies', movieRoutes)
+app.use('/api/admin/movies', adminRoutes)
 
-app.use('/api/auth', router)
-app.use('/api/movies', movieRouter)
-
-
-
-// Error handling 
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
     console.log(`Server running on port : ${PORT}`)
 })
-// server listen 
+

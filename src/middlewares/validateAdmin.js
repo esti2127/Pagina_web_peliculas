@@ -16,6 +16,8 @@ const validateAdmin = (req, res, next) => {
 
 
         req.user = userData;
+
+        
         next()
 
     } catch (error) {
