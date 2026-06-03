@@ -9,7 +9,7 @@ info:
   contact:
     url: https://github.com/esti2127/Pagina_web_peliculas
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3000/api-docs
     description: Servidor de desarrollo
 
 tags:

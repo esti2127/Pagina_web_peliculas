@@ -9,7 +9,7 @@ cloudinary.config({
 })
 
 const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
+    cloudinary,
     params: {
         folder: 'some-folder-name',
         format: async (req, file) => 'jpg'
