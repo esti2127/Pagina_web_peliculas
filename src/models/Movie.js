@@ -141,4 +141,4 @@ const deleteFavService = async (userId, movieId) => {
     }
 }
 
-module.exports = { findMovieService, getAllMoviesService, getUserFavService, deleteMovieService, deleteFavService, setUserFavService, addNewMovieService, findMovieByIdService }
+module.exports = { findMovieService, getAllMoviesService,updateMovieService, getUserFavService, deleteMovieService, deleteFavService, setUserFavService, addNewMovieService, findMovieByIdService }

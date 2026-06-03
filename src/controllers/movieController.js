@@ -1,5 +1,5 @@
 const { database } = require("pg/lib/defaults")
-const { findMovieService, addNewMovieService, findMovieByIdService, getUserFavService, deleteFavService, getAllMoviesService, deleteMovieService } = require("../models/Movie")
+const { findMovieService, addNewMovieService, findMovieByIdService, getUserFavService, deleteFavService, getAllMoviesService, deleteMovieService, updateMovieService } = require("../models/Movie")
 const getFilms = require("../models/Peli_Externa")
 const { setResponse } = require("../utils/utils")
 

@@ -1,9 +1,3 @@
-ALTER TABLE peliculas 
-  ADD codigo_pelicula VARCHAR(200) NOT NULL default 'not set';
-
-
-ALTER TABLE peliculas drop column genero;
-
 
 DROP TABLE IF EXISTS peliculas_generos, peliculas, usuarios, favoritos, generos CASCADE;
 
@@ -18,7 +12,6 @@ CREATE TABLE usuarios (
 
 CREATE TABLE peliculas (
   id_pelicula SERIAL PRIMARY KEY,
-  codigo_pelicula VARCHAR(200) NOT NULL,
   titulo VARCHAR(200) NOT NULL,
   imagen VARCHAR(250) NOT NULL,
   anio INT NOT NULL,
@@ -77,17 +70,17 @@ VALUES
 ('Nati', 'nati@gmail.com', '2014', 'admin');
 
 
-INSERT INTO peliculas(titulo, imagen, anio, director, genero, duracion)
+INSERT INTO peliculas(titulo, imagen, anio, director, duracion)
 VALUES
-('The Shawshank Redemption', 'https://www.imdb.com/title/tt0111161/', 1994, 'Frank Darabont', 'Drama', 142),
+('The Shawshank Redemption', 'https://www.imdb.com/title/tt0111161/', 1994, 'Frank Darabont', 142),
 
-('The Godfather', 'https://www.imdb.com/title/tt0068646/', 1972, 'Francis Ford Coppola', 'Crime, Drama', 175),
+('The Godfather', 'https://www.imdb.com/title/tt0068646/', 1972, 'Francis Ford Coppola', 175),
 
-('Inception', 'https://www.imdb.com/title/tt1375666/', 2010, 'Christopher Nolan', 'Action, Adventure, Sci-Fi', 148),
+('Inception', 'https://www.imdb.com/title/tt1375666/', 2010, 'Christopher Nolan', 148),
 
-('Parasite', 'https://www.imdb.com/title/tt6751668/', 2019, 'Bong Joon Ho', 'Drama, Thriller', 132),
+('Parasite', 'https://www.imdb.com/title/tt6751668/', 2019, 'Bong Joon Ho', 132),
 
-('Interstellar', 'https://www.imdb.com/title/tt0816692/', 2014, 'Christopher Nolan', 'Adventure, Drama, Sci-Fi', 169);
+('Interstellar', 'https://www.imdb.com/title/tt0816692/', 2014, 'Christopher Nolan', 169);
 
 
 

@@ -1,0 +1,715 @@
+openapi: 3.0.3
+info:
+  title: Películas API
+  description: |
+    API para la gestión de películas, usuarios y favoritos.
+    Incluye autenticación JWT, búsqueda en base de datos local
+    y respaldo en API externa (OMDB).
+  version: 1.0.0
+  contact:
+    url: https://github.com/esti2127/Pagina_web_peliculas
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desarrollo
+
+tags:
+  - name: Auth
+    description: Registro e inicio de sesión
+  - name: Movies
+    description: Operaciones sobre películas (usuario)
+  - name: Admin
+    description: Gestión de películas (admin)
+  - name: Favorites
+    description: Gestión de favoritos del usuario
+
+paths:
+  /api/auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: Registrar un nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - email
+                - password
+                - rol
+              properties:
+                nombre:
+                  type: string
+                  example: "soo"
+                email:
+                  type: string
+                  format: email
+                  example: "usuario@correo.com"
+                password:
+                  type: string
+                  minLength: 6
+                  example: "abc123"
+                rol:
+                  type: string
+                  enum:
+                    - user
+                    - admin
+                  example: "user"
+      responses:
+        "201":
+          description: Usuario registrado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Solicitud inválida (datos incorrectos o email duplicado)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "usuario@correo.com"
+                password:
+                  type: string
+                  example: "abc123"
+      responses:
+        "200":
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Email o contraseña incorrectos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/movies/search:
+    get:
+      tags:
+        - Movies
+      summary: Buscar una película por título
+      description: |
+        Busca el título en la base de datos local. Si no existe, consulta
+        la API externa OMDB y la guarda automáticamente.
+      security:
+        - BearerAuthAdmin: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - titulo
+              properties:
+                titulo:
+                  type: string
+                  example: "Inception"
+      responses:
+        "200":
+          description: Película encontrada (local o externa)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MovieSearchLocalResponse"
+                  - $ref: "#/components/schemas/MovieSearchExternalResponse"
+        "400":
+          description: Película no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/movies/favorites:
+    get:
+      tags:
+        - Favorites
+      summary: Obtener favoritos del usuario autenticado
+      security:
+        - BearerAuthUser: []
+      responses:
+        "200":
+          description: Lista de favoritos del usuario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoritesResponse"
+        "400":
+          description: Token no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /api/movies/favorites/{id}:
+    delete:
+      tags:
+        - Favorites
+      summary: Eliminar una película de favoritos
+      security:
+        - BearerAuthUser: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la película a eliminar de favoritos
+          schema:
+            type: integer
+            example: 4
+      responses:
+        "200":
+          description: Favorito eliminado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Token no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: Favorito no encontrado para este usuario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /api/admin/movies:
+    get:
+      tags:
+        - Admin
+      summary: Obtener todas las películas
+      security:
+        - BearerAuthAdmin: []
+      responses:
+        "200":
+          description: Lista de todas las películas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+    post:
+      tags:
+        - Admin
+      summary: Añadir una nueva película
+      description: Crea una película con imagen subida a Cloudinary
+      security:
+        - BearerAuthAdmin: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - titulo
+                - director
+                - anio
+                - duracion
+                - imagen
+              properties:
+                titulo:
+                  type: string
+                  example: "Inception"
+                director:
+                  type: string
+                  example: "Christopher Nolan"
+                anio:
+                  type: integer
+                  example: 2010
+                duracion:
+                  type: integer
+                  description: Duración en minutos
+                  example: 148
+                imagen:
+                  type: string
+                  format: binary
+                  description: Archivo de imagen de la película
+      responses:
+        "201":
+          description: Película creada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieCreatedResponse"
+        "400":
+          description: No se subió ningún archivo o faltan campos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /api/admin/movies/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Obtener detalle de una película por su código
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Código de la película (ej. "terminator-1996")
+          schema:
+            type: string
+            example: "In11111"
+      responses:
+        "200":
+          description: Detalle de la película
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieDetailResponse"
+        "404":
+          description: Película no encontrada en la base de datos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+    put:
+      tags:
+        - Admin
+      summary: Actualizar una película existente
+      security:
+        - BearerAuthAdmin: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID numérico de la película
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - titulo
+                - director
+                - anio
+                - duracion
+              properties:
+                titulo:
+                  type: string
+                  example: "Inception"
+                director:
+                  type: string
+                  example: "Christopher Nolan"
+                anio:
+                  type: integer
+                  example: 2010
+                duracion:
+                  type: integer
+                  description: Duración en minutos
+                  example: 148
+                imagen:
+                  type: string
+                  format: binary
+                  description: Nuevo archivo de imagen (opcional)
+      responses:
+        "200":
+          description: Película actualizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieUpdatedResponse"
+        "400":
+          description: Faltan campos requeridos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          description: Película no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+    delete:
+      tags:
+        - Admin
+      summary: Eliminar una película
+      security:
+        - BearerAuthAdmin: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID numérico de la película a eliminar
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: Película eliminada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          description: La película no existe en la base de datos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+components:
+  securitySchemes:
+    BearerAuthUser:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT de cualquier usuario registrado
+    BearerAuthAdmin:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT con rol "admin"
+
+  schemas:
+    # ────────────────────────────
+    # Usuario
+    # ────────────────────────────
+    User:
+      type: object
+      properties:
+        id_usuario:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: "soo"
+        email:
+          type: string
+          format: email
+          example: "usuario@correo.com"
+        rol:
+          type: string
+          enum:
+            - user
+            - admin
+          example: "user"
+
+    # ────────────────────────────
+    # Película (local DB)
+    # ────────────────────────────
+    Movie:
+      type: object
+      properties:
+        id_pelicula:
+          type: integer
+          example: 1
+        codigo_pelicula:
+          type: string
+          example: "In11111"
+        titulo:
+          type: string
+          example: "Inception"
+        imagen:
+          type: string
+          format: uri
+          example: "https://res.cloudinary.com/..."
+        anio:
+          type: integer
+          example: 2010
+        director:
+          type: string
+          example: "Christopher Nolan"
+        duracion:
+          type: integer
+          description: Duración en minutos
+          example: 148
+
+    # ────────────────────────────
+    # Película externa (OMDB)
+    # ────────────────────────────
+    ExternalMovie:
+      type: object
+      properties:
+        Title:
+          type: string
+          example: "Inception"
+        Year:
+          type: string
+          example: "2010"
+        Runtime:
+          type: string
+          example: "148 min"
+        Poster:
+          type: string
+          format: uri
+          example: "https://m.media-amazon.com/images/..."
+        Director:
+          type: string
+          example: "Christopher Nolan"
+        imdbID:
+          type: string
+          example: "tt1375666"
+
+    # ────────────────────────────
+    # Favorito (join con película)
+    # ────────────────────────────
+    FavoriteMovie:
+      type: object
+      properties:
+        id_favorito:
+          type: integer
+          example: 1
+        id_pelicula:
+          type: integer
+          example: 1
+        codigo_pelicula:
+          type: string
+          example: "In11111"
+        titulo:
+          type: string
+          example: "Inception"
+        imagen:
+          type: string
+          format: uri
+        anio:
+          type: integer
+          example: 2010
+        director:
+          type: string
+          example: "Christopher Nolan"
+        duracion:
+          type: integer
+          example: 148
+
+    # ────────────────────────────
+    # Respuestas genéricas
+    # ────────────────────────────
+    SuccessResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          enum:
+            - true
+          example: true
+        message:
+          type: string
+          example: "Operación exitosa"
+
+    ErrorResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          enum:
+            - false
+          example: false
+        message:
+          type: string
+          example: "Descripción del error"
+
+    TokenResponse:
+      type: string
+      example: "eyJhbGciOiJIUzI1NiIs..."
+
+    # ────────────────────────────
+    # Respuestas específicas
+    # ────────────────────────────
+    AuthResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "logged in successfully"
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIs..."
+        user:
+          $ref: "#/components/schemas/User"
+
+    FavoritesResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "User favs"
+        favs:
+          type: array
+          items:
+            $ref: "#/components/schemas/FavoriteMovie"
+
+    MovieListResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Movie list details"
+        movies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Movie"
+
+    MovieDetailResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Movie Details"
+        movieData:
+          $ref: "#/components/schemas/Movie"
+
+    MovieCreatedResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Movie has been created successfully"
+        addedMovie:
+          $ref: "#/components/schemas/Movie"
+
+    MovieUpdatedResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Movie updated successfully"
+        updatedMovie:
+          $ref: "#/components/schemas/Movie"
+
+    MovieSearchLocalResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Search Details"
+        source:
+          type: string
+          example: "local"
+        movies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Movie"
+
+    MovieSearchExternalResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "movie found"
+        source:
+          type: string
+          example: "external"
+        data:
+          $ref: "#/components/schemas/ExternalMovie"
+
+  responses:
+    UnauthorizedError:
+      description: Token no proporcionado o inválido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    ForbiddenError:
+      description: Acceso denegado (se requiere rol de administrador)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    ServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
