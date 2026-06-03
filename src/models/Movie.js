@@ -16,6 +16,11 @@ const findMovieService = async (titulo) => {
     }
 }
 
+
+
+
+
+
 const getAllMoviesService = async () => {
     try {
         const resp = await pool.query(

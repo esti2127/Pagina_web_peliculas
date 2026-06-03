@@ -15,11 +15,15 @@ const dbConfig = {
 
 const pool = new Pool(dbConfig);
 pool.on('connect', () => {
+
     console.log('Pool de PostgreSQL lista para servir películas');
+
 });
 
 pool.on('error', (err) => {
+
     console.error('Error crítico en la Pool de películas:', err.message);
+
 });
 
-module.exports = {pool};
+module.exports = { pool };
