@@ -1,5 +1,5 @@
 const { database } = require("pg/lib/defaults")
-const { findMovieService, addNewMovieService, findMovieByIdService, getUserFavService, deleteFavService, getAllMoviesService, deleteMovieService, updateMovieService } = require("../models/Movie")
+const { findMovieService, addNewMovieService, findMovieByIdService, getUserFavService, deleteFavService, getAllMoviesService, deleteMovieService, updateMovieService, setUserFavService } = require("../models/Movie")
 const getFilms = require("../models/Peli_Externa")
 const { setResponse } = require("../utils/utils")
 
@@ -7,33 +7,38 @@ const { setResponse } = require("../utils/utils")
 const searchMovie = async (req, res) => {
 
     try {
+
         const movies = await findMovieService(req.body.titulo)
-        if (movies === 0) {
+
+        if (movies.length === 0) {
+
             //api externa
             const data = await getFilms(req.body.titulo)
 
-            const { Title: titulo, Year: anio, Runtime, Poster: imagen, Director: director, imdbID: codigo_pelicula } = data
-            const duracion = Runtime.split(' ')[0]
-            
+            const { Title: titulo, Year, Runtime, Poster: imagen, Director: director, imdbID: codigo_pelicula } = data
+
+            const duracion = parseInt(Runtime.split(' ')[0])
+            const anio = parseInt(Year)
+
             await addNewMovieService(titulo, imagen, anio, director, duracion, codigo_pelicula)
 
             return res.status(200).json({
                 ok: true,
                 message: "movie found",
-                source:"external",
+                source: "external",
                 data
             })
-            await addNewMovieService(titulo, imagen, anio, director, duracion, codigo_pelicula)
         }
+
         return res.status(200).json({
             ok: true,
             message: "Search Details",
-            source:"local",
+            source: "local",
             movies
         })
     } catch (error) {
         console.log(error)
-        return res.status(400).json({
+        return res.status(500).json({
             ok: false,
             message: "No movie found"
         })
@@ -49,7 +54,7 @@ const getFavorites = async (req, res) => {
             return res.status(400).json({
                 ok: false,
                 message: "User id not found"
-            });
+            })
         }
 
         const favs = await getUserFavService(userId)
@@ -58,7 +63,7 @@ const getFavorites = async (req, res) => {
             return res.status(200).json({
                 ok: true,
                 message: "User doesnt have favs yet"
-            });
+            })
         }
 
         return res.status(200).json({
@@ -78,27 +83,31 @@ const getFavorites = async (req, res) => {
 
 const setFavorite = async (req, res) => {
     try {
-        const { id_usuario: userId, id_pelicula: movieId } = req.body
 
-        const favs = await setUserFavService(userId, movieId)
-        if (favs.length === 0) {
+        const userId = req.user.id
+
+        const { id: movieId } = req.params
+
+        if (!userId || !movieId) {
             return res.status(400).json({
                 ok: false,
-                message: "Error adding movie to favs"
+                message: "No user or movie data"
             })
         }
+
+        const fav = await setUserFavService(userId, movieId)
 
         res.status(200).json({
             ok: true,
             message: "Movie has been added to favs",
-            favs
+            fav
         })
 
     } catch (error) {
-        console.log(error)
+        console.error(error);
         res.status(500).json({
             ok: false,
-            message: "Error server"
+            message: "Server error"
         })
     }
 }
@@ -108,7 +117,7 @@ const getMovieDetails = async (req, res) => {
         //  console.log(movieId);
 
         const foundMovie = await findMovieByIdService(movieId);
-        
+
         if (foundMovie === 0 || !foundMovie) {
             return res.status(404).json({
                 ok: false,
@@ -136,7 +145,7 @@ const getMovieDetails = async (req, res) => {
 const deleteFavorite = async (req, res) => {
     try {
         const { id: movieId } = req.params
-        const userId = req.user.id;
+        const userId = req.user.id
 
         const removedFav = await deleteFavService(userId, movieId);
 
@@ -224,15 +233,9 @@ const addNewMovie = async (req, res) => {
 
 const updateMovie = async (req, res) => {
     try {
+
         const { id: movieId } = req.params
         const { titulo, director, anio, duracion } = req.body
-
-        if (!titulo || !director || !anio || !duracion) {
-            return res.status(400).json({
-                ok: false,
-                message: "Fill required inputs titlo, director, anio ,duracion"
-            })
-        }
 
         let imagen = null
         if (req.file) {

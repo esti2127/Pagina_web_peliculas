@@ -1,10 +1,7 @@
 const bcrypt = require('bcryptjs')
 const { pool } = require('../config/pool')
 
-/*
-This function register a user in database,
-it returns the current registred user minus his password.
-*/
+
 const registerUserService = async (body) => {
 
     const { nombre, email, password, rol } = body
@@ -22,11 +19,7 @@ const registerUserService = async (body) => {
 
 }
 
-/*
-This function check if user exist in database,
-if user exists, it then verify the passowrd, if password valid it returns user data minus passwrod.
-if user doesnt exist it throw an error : user is not registred.
-*/
+
 const loginUserService = async (email, password) => {
 
     const resp = await pool.query(

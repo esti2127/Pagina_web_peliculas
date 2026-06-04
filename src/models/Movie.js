@@ -8,17 +8,13 @@ const findMovieService = async (titulo) => {
             'SELECT * FROM peliculas WHERE titulo=$1',
             [titulo]
         )
-        return resp.rows.length === 0 ? 0 : resp.rows
+        return resp.rows
 
     } catch (error) {
         console.log(error)
-        throw new Error('Movie is not found on local db')
+        throw error
     }
 }
-
-
-
-
 
 
 const getAllMoviesService = async () => {
@@ -30,7 +26,7 @@ const getAllMoviesService = async () => {
 
     } catch (error) {
         console.error(error)
-        throw new Error('Error db')
+        throw error
     }
 }
 
@@ -40,12 +36,12 @@ const findMovieByIdService = async (movieId) => {
             'SELECT * FROM peliculas WHERE codigo_pelicula=$1',
             [movieId]
         )
-       // console.log(resp)
+        // console.log(resp)
         return resp.rows.length === 0 ? 0 : resp.rows[0];
 
     } catch (error) {
         console.log(error);
-        throw new Error('Server Error');
+        throw error
     }
 }
 
@@ -58,39 +54,73 @@ const getUserFavService = async (userId) => {
             [userId]
         )
 
-        return resp.rows;
+        // console.log(resp.rows)
+        return resp.rows
+
     } catch (error) {
         console.error(error);
-        throw new Error('Error server');
+        throw error
     }
 }
 
 const setUserFavService = async (userId, movieId) => {
-
     try {
-        const resp = await pool.query(
-            'INSERT INTO favoritos id_usuario, id_pelicua VALUES ($1, $2) returning *',
+        //check if the movie if is already in favs
+        const existingFav = await pool.query(
+            'SELECT id_favorito FROM favoritos WHERE id_usuario = $1 AND id_pelicula = $2',
             [userId, movieId]
         )
-        return resp.rows[0]
+
+        if (existingFav.rows.length > 0) {
+            return 
+        }
+
+        const resp = await pool.query(
+            'INSERT INTO favoritos (id_usuario, id_pelicula) VALUES ($1, $2) RETURNING id_favorito',
+            [userId, movieId]
+        )
+
+        const savedFavId = resp.rows[0].id_favorito;
+
+        /// we do join to get user and movie data, we need to do this because favoritos tables
+        //  just return keys ids not user and movie details.
+        const favDetails = await pool.query(
+            `SELECT 
+                f.id_favorito, 
+                u.nombre AS usuario_nombre, 
+                u.email AS usuario_email,
+                p.id_pelicula, 
+                p.titulo, 
+                p.imagen, 
+                p.anio, 
+                p.director, 
+                p.duracion, 
+                p.codigo_pelicula
+             FROM favoritos f
+             JOIN usuarios u ON f.id_usuario = u.id_usuario
+             JOIN peliculas p ON f.id_pelicula = p.id_pelicula
+             WHERE f.id_favorito = $1`,
+            [savedFavId]
+        )
+
+        return favDetails.rows[0]
 
     } catch (error) {
-        console.log(error)
-        throw new Error('Error fetching data from db')
+        console.error(error)
+        throw error
     }
 }
-
 const addNewMovieService = async (titulo, imagen, anio, director, duracion, codigo_pelicula) => {
     try {
         const resp = await pool.query(
             'INSERT INTO peliculas (titulo,imagen,anio,director,duracion,codigo_pelicula) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
             [titulo, imagen, anio, director, duracion, codigo_pelicula]
         )
-       // console.log(resp)
+        // console.log(resp)
         return resp.rows[0]
     } catch (error) {
         console.log(error)
-        throw new Error('Cant add movie to database')
+        throw error
     }
 
 }
@@ -110,10 +140,10 @@ const updateMovieService = async (movieId, titulo, imagen, anio, director, durac
         );
 
         return resp.rows[0]
-        
+
     } catch (error) {
         console.error(error)
-        throw new Error('Cannt update movie')
+        throw error
     }
 }
 
@@ -124,11 +154,11 @@ const deleteMovieService = async (movieId) => {
             [movieId]
         )
 
-        return resp.rowCount;
+        return resp.rowCount
 
     } catch (error) {
-        console.error("Database Error:", error);
-        throw new Error('Error movie delete from database');
+        console.error(error)
+        throw error
     }
 }
 
@@ -142,8 +172,8 @@ const deleteFavService = async (userId, movieId) => {
 
     } catch (error) {
         console.error(error)
-        throw new Error('Error delete fav form db')
+        throw error
     }
 }
 
-module.exports = { findMovieService, getAllMoviesService,updateMovieService, getUserFavService, deleteMovieService, deleteFavService, setUserFavService, addNewMovieService, findMovieByIdService }
+module.exports = { findMovieService, getAllMoviesService, updateMovieService, getUserFavService, deleteMovieService, deleteFavService, setUserFavService, setUserFavService, addNewMovieService, findMovieByIdService }
